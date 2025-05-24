@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>All Format Image Converter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen px-4">
+  <div class="bg-white shadow-md rounded-xl p-6 w-full max-w-lg">
+    <h1 class="text-2xl font-bold text-center text-indigo-700 mb-5">🌐 Image Format Converter</h1>
+
+    <input type="file" id="imageInput" accept="image/*" class="mb-4 w-full text-sm" />
+
+    <label for="formatSelect" class="block text-sm font-medium mb-1">Convert To:</label>
+    <select id="formatSelect" class="w-full p-2 border rounded text-sm mb-4">
+      <option value="jpeg">JPG</option>
+      <option value="jpeg">JPEG</option>
+      <option value="png">PNG</option>
+      <option value="webp">WEBP</option>
+      <option value="bmp">BMP</option>
+      <option value="avif">AVIF</option>
+    </select>
+
+    <button id="convertBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm py-2 rounded mb-3">
+      Convert Image
+    </button>
+
+    <div id="result" class="hidden text-center">
+      <img id="outputImage" class="max-w-full mx-auto rounded border mb-2" />
+      <a id="downloadBtn" href="#" download class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm rounded">
+        Download Image
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const formatSelect = document.getElementById('formatSelect');
+    const convertBtn = document.getElementById('convertBtn');
+    const outputImage = document.getElementById('outputImage');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const result = document.getElementById('result');
+
+    convertBtn.addEventListener('click', () => {
+      const file = imageInput.files[0];
+      if (!file || !file.type.startsWith('image/')) {
+        alert("Please upload a valid image file.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+
+          const format = formatSelect.value;
+          const mimeType = format === 'jpg' || format === 'jpeg' ? 'image/jpeg' : 'image/' + format;
+
+          canvas.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            outputImage.src = url;
+            downloadBtn.href = url;
+            downloadBtn.download = `converted.${format}`;
+            result.classList.remove('hidden');
+          }, mimeType);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
